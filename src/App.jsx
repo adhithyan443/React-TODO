@@ -14,7 +14,7 @@ function App() {
 
   const [newTitle, setNewTitle] = useState('');
   const [newDeadline, setNewDeadline] = useState('');
-
+  const [newLabel, setNewLabel] = useState('Personal');
 
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -29,13 +29,14 @@ function App() {
       title: newTitle,
       deadline: newDeadline || '',
       completed: false,
-      label: 'Personal'
+      label: newLabel
     };
 
 
-    setTasks([...tasks, newTask])
+    setTasks([...tasks, newTask]);
     setNewTitle('');
     setNewDeadline('');
+    setNewLabel('Personal');
 
   }
 
@@ -98,6 +99,7 @@ function App() {
 
         {/* Add Task Form */}
         <div className="px-8 pb-6">
+          
           <div className="flex gap-3 bg-white p-2 rounded-3xl shadow-sm border border-gray-100">
             <input
               type="text"
@@ -106,12 +108,25 @@ function App() {
               placeholder="What needs to be done?"
               className="flex-1 px-6 py-4 bg-transparent focus:outline-none text-lg placeholder-gray-400"
             />
+
             <input
               type="date"
               value={newDeadline}
               onChange={(e) => setNewDeadline(e.target.value)}
               className="px-6 py-4 bg-transparent focus:outline-none border-l border-gray-200 text-gray-600"
             />
+
+            <select
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+              className="px-6 py-4 bg-transparent focus:outline-none border-l border-gray-200 text-gray-600 rounded-r-3xl"
+            >
+              <option value="Work">Work</option>
+              <option value="Personal">Personal</option>
+              <option value="Health">Health</option>
+              <option value="Other">Other</option>
+            </select>
+
             <button className="bg-violet-600 hover:bg-violet-700 text-white px-8 rounded-3xl flex items-center gap-2 font-medium transition-colors"
               onClick={addTask}
             >
@@ -152,7 +167,7 @@ function App() {
                   task={task}
                   onToggle={toggleComplete}
                   onDelete={deleteTask}
-                  isOverdue = {isOverdue}
+                  isOverdue={isOverdue}
                 />
               ))
             )}

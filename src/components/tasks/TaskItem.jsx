@@ -3,12 +3,18 @@ function TaskItem({ task, onToggle, onDelete, isOverdue }) {
 
     const overdue = !task.completed && isOverdue(task.deadline);
 
+    const statusColor = task.completed
+        ? 'bg-green-500'
+        : overdue
+            ? 'bg-red-500'
+            : 'bg-violet-600';
+
     return (
 
         <div className="bg-white rounded-3xl p-5 flex items-center gap-4 border border-gray-100 hover:shadow-md transition-shadow group">
 
-            <div className={`w-1 h-12 rounded-full -ml-1 ${!task.completed && overdue ? 'bg-red-500' : 'bg-green-300'}`}></div>
-
+            <div className={`w-1 h-12 rounded-full -ml-1 ${statusColor}`}></div>
+            
             <input
                 type="checkbox"
                 checked={task.completed}
