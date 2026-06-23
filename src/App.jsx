@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import TaskItem from "./components/tasks/TaskItem"
 import SideBar from "./components/layout/Sidebar";
+import toast, { Toaster } from "react-hot-toast";
 
 
 function App() {
@@ -10,7 +11,7 @@ function App() {
     return savedTasks ? JSON.parse(savedTasks) : [];
   });
 
-  
+
   const [newTitle, setNewTitle] = useState('');
   const [newDeadline, setNewDeadline] = useState('');
 
@@ -49,6 +50,24 @@ function App() {
     const updatedTasks = tasks.filter(task => task.id !== id);
     setTasks(updatedTasks)
   }
+
+  const isOverdue = (deadline) => {
+    if (!deadline) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = new Date(deadline);
+    return due < today
+  }
+
+  useEffect(() => {
+    const overdueCount = tasks.filter(task => !task.completed && isOverdue(task.deadline)).length;
+    if (overdueCount > 0) {
+      toast.error(`You have ${overdueCount} overdue task(s)!`, {
+        duration: 5000,
+        icon: '⚠️',
+      });
+    }
+  }, [tasks]);
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -133,6 +152,7 @@ function App() {
                   task={task}
                   onToggle={toggleComplete}
                   onDelete={deleteTask}
+                  isOverdue = {isOverdue}
                 />
               ))
             )}
@@ -146,6 +166,9 @@ function App() {
 
 
       </div>
+
+      <Toaster position="top-right" />
+
     </div>
   );
 }

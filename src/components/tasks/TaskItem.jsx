@@ -1,11 +1,12 @@
 
-function TaskItem({ task, onToggle, onDelete }) {
+function TaskItem({ task, onToggle, onDelete,isOverdue }) {
 
 
     return (
-
+        
         <div className="bg-white rounded-3xl p-5 flex items-center gap-4 border border-gray-100 hover:shadow-md transition-shadow group">
-            <div className="w-1 h-12 bg-red-500 rounded-full -ml-1"></div>
+            
+           <div className={`w-1 h-12 rounded-full -ml-1 ${!task.completed && isOverdue(task.deadline) ? 'bg-red-500' : 'bg-green-300'}`}></div>
 
             <input
                 type="checkbox"
