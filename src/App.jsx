@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import TaskItem from "./components/tasks/TaskItem"
 import SideBar from "./components/layout/Sidebar";
 import toast, { Toaster } from "react-hot-toast";
+import TaskForm from "./components/tasks/TaskForm";
+import TaskList from "./components/tasks/TaskList";
+import StatsBar from "./components/layout/StatusBar";
+import EditModel from "./components/tasks/EditModel";
 
 
 function App() {
@@ -15,6 +18,16 @@ function App() {
   const [newTitle, setNewTitle] = useState('');
   const [newDeadline, setNewDeadline] = useState('');
   const [newLabel, setNewLabel] = useState('Personal');
+  const [filter, setFilter] = useState('All');
+  const [sortBy, setSortBy] = useState('deadline-asc')
+
+
+  const [editingTask, setEditingTask] = useState(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDeadline, setEditDeadline] = useState('');
+  const [editLabel, setEditLabel] = useState('Personal');
+
+
 
   useEffect(() => {
     localStorage.setItem('tasks', JSON.stringify(tasks));
@@ -60,6 +73,30 @@ function App() {
     return due < today
   }
 
+
+  const filteredTasks = tasks.filter(task => {
+    if (filter === 'All') return true;
+    if (filter === 'Active') return !task.completed;
+    if (filter === 'Completed') return task.completed;
+    if (filter === 'Overdue') return !task.completed && isOverdue(task.deadline);
+
+    //Label Filter
+    
+    if (filter === "Work")
+      return task.label === "Work";
+
+    if (filter === "Personal")
+      return task.label === "Personal";
+
+    if (filter === "Health")
+      return task.label === "Health";
+
+    if (filter === "Other")
+      return task.label === "Other";
+    return true;
+  });
+
+
   useEffect(() => {
     const overdueCount = tasks.filter(task => !task.completed && isOverdue(task.deadline)).length;
     if (overdueCount > 0) {
@@ -70,10 +107,69 @@ function App() {
     }
   }, [tasks]);
 
+
+
+  const sortedTask = [...filteredTasks].sort((a, b) => {
+    if (!a.deadline) return 1;
+    if (!b.deadline) return -1;
+
+    const dateA = new Date(a.deadline);
+    const dateB = new Date(b.deadline);
+
+    return sortBy === 'deadline-asc' ? dateA - dateB : dateB - dateA;
+
+  })
+
+
+  const startEdit = (task) => {
+    setEditingTask(task)
+    setEditTitle(task.title);
+    setEditDeadline(task.deadline || '');
+    setEditLabel(task.label);
+  };
+
+  const saveEdit = () => {
+    if (!editTitle.trim() || !editingTask) return;
+
+    const updatedTasks = tasks.map(task =>
+      task.id === editingTask.id
+        ? {
+          ...task,
+          title: editTitle,
+          deadline: editDeadline,
+          label: editLabel
+        }
+        : task
+    );
+
+    setTasks(updatedTasks);
+    setEditingTask(null);        // Close edit mode
+    setEditTitle('');
+    setEditDeadline('');
+    setEditLabel('Personal');
+  };
+
+  const cancelEdit = () => {
+    setEditingTask(null);
+    setEditTitle('');
+    setEditDeadline('');
+    setEditLabel('Personal');
+  };
+
+
+
+
+
+
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
 
-      <SideBar />
+      <SideBar
+        tasks={tasks}
+        filter={filter}
+        setFilter={setFilter}
+        isOverdue={isOverdue}
+      />
 
       {/* ====================== MAIN CONTENT ====================== */}
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -86,101 +182,97 @@ function App() {
               <p className="text-gray-500 mt-1">Here's what's on your plate today.</p>
             </div>
 
-            {/* Overdue Banner */}
-            <div className="bg-red-50 border border-red-200 text-red-700 px-5 py-4 rounded-2xl flex items-center gap-3 text-sm">
-              <div className="w-6 h-6 bg-red-600 text-white rounded-xl flex items-center justify-center flex-shrink-0">!</div>
-              <div>
-                <strong>Overdue Task</strong><br />
-                You have 1 overdue task!
-              </div>
-            </div>
+
           </div>
         </div>
 
         {/* Add Task Form */}
-        <div className="px-8 pb-6">
-          
-          <div className="flex gap-3 bg-white p-2 rounded-3xl shadow-sm border border-gray-100">
-            <input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="What needs to be done?"
-              className="flex-1 px-6 py-4 bg-transparent focus:outline-none text-lg placeholder-gray-400"
-            />
-
-            <input
-              type="date"
-              value={newDeadline}
-              onChange={(e) => setNewDeadline(e.target.value)}
-              className="px-6 py-4 bg-transparent focus:outline-none border-l border-gray-200 text-gray-600"
-            />
-
-            <select
-              value={newLabel}
-              onChange={(e) => setNewLabel(e.target.value)}
-              className="px-6 py-4 bg-transparent focus:outline-none border-l border-gray-200 text-gray-600 rounded-r-3xl"
-            >
-              <option value="Work">Work</option>
-              <option value="Personal">Personal</option>
-              <option value="Health">Health</option>
-              <option value="Other">Other</option>
-            </select>
-
-            <button className="bg-violet-600 hover:bg-violet-700 text-white px-8 rounded-3xl flex items-center gap-2 font-medium transition-colors"
-              onClick={addTask}
-            >
-              Add Task <span className="text-xl">+</span>
-            </button>
-          </div>
-        </div>
+        <TaskForm
+          newTitle={newTitle}
+          setNewTitle={setNewTitle}
+          newDeadline={newDeadline}
+          setNewDeadline={setNewDeadline}
+          newLabel={newLabel}
+          setNewLabel={setNewLabel}
+          onAddTask={addTask}
+        />
 
         {/* Filter Tabs + Sort */}
         <div className="px-8 pt-3 pb-4 border-b border-gray-100 bg-white flex items-center">
           <div className="flex gap-1 text-sm">
-            <button className="px-6 py-2 bg-violet-600 text-white rounded-2xl font-medium">All</button>
-            <button className="px-6 py-2 hover:bg-gray-100 rounded-2xl text-gray-600 transition-colors">Active</button>
-            <button className="px-6 py-2 hover:bg-gray-100 rounded-2xl text-gray-600 transition-colors">Completed</button>
-            <button className="px-6 py-2 hover:bg-gray-100 rounded-2xl text-gray-600 transition-colors">Overdue</button>
+            <button
+              onClick={() => setFilter('All')}
+              className={`px-6 py-2 rounded-2xl font-medium ${filter === 'All' ? 'bg-violet-600 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+            >
+              All
+            </button>
+
+            <button
+              onClick={() => setFilter('Active')}
+              className={`px-6 py-2 rounded-2xl font-medium ${filter === 'Active' ? 'bg-violet-600 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+            >
+              Active
+            </button>
+
+            <button
+              onClick={() => setFilter('Completed')}
+              className={`px-6 py-2 rounded-2xl font-medium ${filter === 'Completed' ? 'bg-violet-600 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+            >
+              Completed
+            </button>
+
+            <button
+              onClick={() => setFilter('Overdue')}
+              className={`px-6 py-2 rounded-2xl font-medium ${filter === 'Overdue' ? 'bg-violet-600 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
+            >
+              Overdue
+            </button>
           </div>
 
           <div className="ml-auto flex items-center gap-2 text-sm text-gray-500">
             Sort by:
-            <select className="bg-transparent border border-gray-200 rounded-xl px-3 py-2 text-gray-700 focus:outline-none cursor-pointer">
-              <option>Deadline (Soonest)</option>
-              <option>Deadline (Latest)</option>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="bg-transparent border border-gray-200 rounded-xl px-3 py-2 text-gray-700 focus:outline-none cursor-pointer"
+            >
+              <option value="deadline-asc">Deadline (Soonest)</option>
+              <option value="deadline-desc">Deadline (Latest)</option>
+
             </select>
           </div>
         </div>
 
         {/* Task List */}
-        <div className="flex-1 p-8 overflow-auto">
-          <div className="space-y-4">
-            {tasks.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
-                No tasks yet. Add one above!
-              </div>
-            ) : (
-              tasks.map(task => (
-                < TaskItem
-                  key={task.id}
-                  task={task}
-                  onToggle={toggleComplete}
-                  onDelete={deleteTask}
-                  isOverdue={isOverdue}
-                />
-              ))
-            )}
+        <TaskList
+          filteredTasks={sortedTask}
+          onToggle={toggleComplete}
+          onDelete={deleteTask}
+          isOverdue={isOverdue}
+          onEdit={startEdit}
 
+        />
 
-
-          </div>
-        </div>
-
-
-
+        <StatsBar
+          tasks={tasks}
+          isOverdue={isOverdue}
+        />
 
       </div>
+
+      {editingTask && (
+        <EditModel
+          task={editingTask}
+          onSave={(updatedTask) => {
+            const updatedTasks = tasks.map(t =>
+              t.id === updatedTask.id ? updatedTask : t
+            );
+            setTasks(updatedTasks);
+            setEditingTask(null);
+          }}
+          onCancel={() => setEditingTask(null)}
+        />
+      )}
 
       <Toaster position="top-right" />
 
