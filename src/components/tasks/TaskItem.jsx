@@ -1,12 +1,13 @@
 
-function TaskItem({ task, onToggle, onDelete,isOverdue }) {
+function TaskItem({ task, onToggle, onDelete, isOverdue }) {
 
+    const overdue = !task.completed && isOverdue(task.deadline);
 
     return (
-        
+
         <div className="bg-white rounded-3xl p-5 flex items-center gap-4 border border-gray-100 hover:shadow-md transition-shadow group">
-            
-           <div className={`w-1 h-12 rounded-full -ml-1 ${!task.completed && isOverdue(task.deadline) ? 'bg-red-500' : 'bg-green-300'}`}></div>
+
+            <div className={`w-1 h-12 rounded-full -ml-1 ${!task.completed && overdue ? 'bg-red-500' : 'bg-green-300'}`}></div>
 
             <input
                 type="checkbox"
@@ -19,7 +20,21 @@ function TaskItem({ task, onToggle, onDelete,isOverdue }) {
                 <p className={`font-medium text-gray-800 ${task.completed ? 'line-through text-gray-400' : ''}`}>
                     {task.title}
                 </p>
-                <p className="text-sm text-gray-500">{task.label}</p>
+
+                <div className="flex items-center gap-2 mt-1">
+                    {overdue && (
+                        <span className="inline-block px-3 py-0.5 text-xs font-medium bg-red-100 text-red-700 rounded-full">
+                            Overdue
+                        </span>
+                    )}
+                    <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                        <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                        {task.label}
+                    </span>
+                </div>
+
+
+
             </div>
 
             {task.deadline && (
