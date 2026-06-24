@@ -69,7 +69,7 @@ function SideBar({ tasks, filter, setFilter, isOverdue }) {
                     >
                         <span>All Tasks</span>
 
-                        <span className="ml-auto bg-white px-2 py-0.5 rounded-full text-xs">
+                        <span className="ml-auto text-gray-500 text-sm">
                             {allTasks}
                         </span>
                     </div>
@@ -212,17 +212,7 @@ function SideBar({ tasks, filter, setFilter, isOverdue }) {
 
                 </div>
 
-                {/* Theme Toggle */}
-                <div className="mt-auto border-t border-gray-200 pt-6">
-                    <div className="flex bg-gray-100 rounded-2xl p-1 text-sm">
-                        <button className="flex-1 py-2.5 rounded-[14px] bg-white shadow-sm text-gray-700 font-medium">
-                            ☀️ Light
-                        </button>
-                        <button className="flex-1 py-2.5 text-gray-500 hover:text-gray-700">
-                            🌙 Dark
-                        </button>
-                    </div>
-                </div>
+               
             </div>
         </div >
     );

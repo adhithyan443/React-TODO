@@ -5,6 +5,8 @@ import TaskForm from "./components/tasks/TaskForm";
 import TaskList from "./components/tasks/TaskList";
 import StatsBar from "./components/layout/StatusBar";
 import EditModel from "./components/tasks/EditModel";
+import Header from "./components/layout/Header";
+import FilterBar from "./components/layout/FilterBar";
 
 
 function App() {
@@ -23,9 +25,9 @@ function App() {
 
 
   const [editingTask, setEditingTask] = useState(null);
-  const [editTitle, setEditTitle] = useState('');
-  const [editDeadline, setEditDeadline] = useState('');
-  const [editLabel, setEditLabel] = useState('Personal');
+  // const [editTitle, setEditTitle] = useState('');
+  // const [editDeadline, setEditDeadline] = useState('');
+  // const [editLabel, setEditLabel] = useState('Personal');
 
 
 
@@ -81,7 +83,7 @@ function App() {
     if (filter === 'Overdue') return !task.completed && isOverdue(task.deadline);
 
     //Label Filter
-    
+
     if (filter === "Work")
       return task.label === "Work";
 
@@ -123,38 +125,38 @@ function App() {
 
   const startEdit = (task) => {
     setEditingTask(task)
-    setEditTitle(task.title);
-    setEditDeadline(task.deadline || '');
-    setEditLabel(task.label);
+    // setEditTitle(task.title);
+    // setEditDeadline(task.deadline || '');
+    // setEditLabel(task.label);
   };
 
-  const saveEdit = () => {
-    if (!editTitle.trim() || !editingTask) return;
+  // const saveEdit = () => {
+  //   if (!editTitle.trim() || !editingTask) return;
 
-    const updatedTasks = tasks.map(task =>
-      task.id === editingTask.id
-        ? {
-          ...task,
-          title: editTitle,
-          deadline: editDeadline,
-          label: editLabel
-        }
-        : task
-    );
+  //   const updatedTasks = tasks.map(task =>
+  //     task.id === editingTask.id
+  //       ? {
+  //         ...task,
+  //         title: editTitle,
+  //         deadline: editDeadline,
+  //         label: editLabel
+  //       }
+  //       : task
+  //   );
 
-    setTasks(updatedTasks);
-    setEditingTask(null);        // Close edit mode
-    setEditTitle('');
-    setEditDeadline('');
-    setEditLabel('Personal');
-  };
+  //   setTasks(updatedTasks);
+  //   setEditingTask(null);        // Close edit mode
+  //   setEditTitle('');
+  //   setEditDeadline('');
+  //   setEditLabel('Personal');
+  // };
 
-  const cancelEdit = () => {
-    setEditingTask(null);
-    setEditTitle('');
-    setEditDeadline('');
-    setEditLabel('Personal');
-  };
+  // const cancelEdit = () => {
+  //   setEditingTask(null);
+  //   setEditTitle('');
+  //   setEditDeadline('');
+  //   setEditLabel('Personal');
+  // };
 
 
 
@@ -175,16 +177,7 @@ function App() {
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="p-8 pb-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-800">My Tasks</h1>
-              <p className="text-gray-500 mt-1">Here's what's on your plate today.</p>
-            </div>
-
-
-          </div>
-        </div>
+        <Header />
 
         {/* Add Task Form */}
         <TaskForm
@@ -198,50 +191,12 @@ function App() {
         />
 
         {/* Filter Tabs + Sort */}
-        <div className="px-8 pt-3 pb-4 border-b border-gray-100 bg-white flex items-center">
-          <div className="flex gap-1 text-sm">
-            <button
-              onClick={() => setFilter('All')}
-              className={`px-6 py-2 rounded-2xl font-medium ${filter === 'All' ? 'bg-violet-600 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-            >
-              All
-            </button>
-
-            <button
-              onClick={() => setFilter('Active')}
-              className={`px-6 py-2 rounded-2xl font-medium ${filter === 'Active' ? 'bg-violet-600 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-            >
-              Active
-            </button>
-
-            <button
-              onClick={() => setFilter('Completed')}
-              className={`px-6 py-2 rounded-2xl font-medium ${filter === 'Completed' ? 'bg-violet-600 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-            >
-              Completed
-            </button>
-
-            <button
-              onClick={() => setFilter('Overdue')}
-              className={`px-6 py-2 rounded-2xl font-medium ${filter === 'Overdue' ? 'bg-violet-600 text-white' : 'hover:bg-gray-100 text-gray-600'}`}
-            >
-              Overdue
-            </button>
-          </div>
-
-          <div className="ml-auto flex items-center gap-2 text-sm text-gray-500">
-            Sort by:
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent border border-gray-200 rounded-xl px-3 py-2 text-gray-700 focus:outline-none cursor-pointer"
-            >
-              <option value="deadline-asc">Deadline (Soonest)</option>
-              <option value="deadline-desc">Deadline (Latest)</option>
-
-            </select>
-          </div>
-        </div>
+        <FilterBar
+          filter={filter}
+          setFilter={setFilter}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+        />
 
         {/* Task List */}
         <TaskList
